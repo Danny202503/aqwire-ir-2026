@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+
+<html lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AQWIRE GLOBAL | Mobile IR Dashboard</title>
+<!-- Tailwind CSS v3 CDN -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Font Awesome for Icons -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+<!-- Chart.js for Simulator -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style data-purpose="custom-animations">
+    @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+
+    :root {
+      --cinematic-bg: #050505;
+      --accent-blue: #2563eb;
+      --card-bg: rgba(20, 25, 35, 0.7);
+      --glass-border: rgba(255, 255, 255, 0.1);
+    }
+
+    body {
+      font-family: 'Pretendard', sans-serif;
+      background-color: var(--cinematic-bg);
+      color: #f8fafc;
+      -webkit-tap-highlight-color: transparent;
+      overflow-x: hidden;
+    }
+
+    /* Cinematic Background Mesh */
+    .bg-mesh {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at 10% 20%, rgba(37, 99, 235, 0.1), transparent 40%),
+                  radial-gradient(circle at 90% 80%, rgba(16, 185, 129, 0.05), transparent 40%);
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    /* Glassmorphism Panels */
+    .glass-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-border);
+      border-radius: 1.25rem;
+    }
+
+    /* Gradient Text */
+    .text-gradient {
+      background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .text-gradient-blue {
+      background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* Reveal Animations */
+    .reveal {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .reveal.active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Energy Pipeline Effect */
+    .pipeline-line {
+      position: relative;
+      height: 2px;
+      background: rgba(255,255,255,0.05);
+      overflow: hidden;
+    }
+    .energy-flow {
+      position: absolute;
+      top: 0;
+      left: -100px;
+      width: 100px;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, #3b82f6, transparent);
+      animation: flow 3s infinite linear;
+    }
+    @keyframes flow {
+      0% { left: -100px; }
+      100% { left: 100%; }
+    }
+
+    /* Neon Glow */
+    .glow-blue {
+      box-shadow: 0 0 20px rgba(37, 99, 235, 0.2);
+    }
+
+    /* Hide Scrollbar */
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    /* Orbital Rings for Chart */
+    .orbital-container {
+      position: relative;
+      width: 180px;
+      height: 180px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .ring {
+      position: absolute;
+      border-radius: 50%;
+      border: 1px dashed rgba(59, 130, 246, 0.3);
+      animation: spin 10s linear infinite;
+    }
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+  </style>
+</head>
+<body class="pb-24">
+<!-- BEGIN: Background -->
+<div class="bg-mesh"></div>
+<!-- END: Background -->
+<!-- BEGIN: Navigation -->
+<nav class="fixed top-0 w-full z-50 transition-all duration-300" id="navbar">
+<div class="bg-black/60 backdrop-blur-lg border-b border-white/5 px-5 py-4 flex justify-between items-center">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+<i class="fas fa-globe-asia text-white text-sm"></i>
+</div>
+<span class="text-xl font-black tracking-tighter">AQWIRE<span class="text-blue-500">.</span></span>
+</div>
+<button class="text-white p-2" id="mobile-menu-btn">
+<i class="fas fa-bars-staggered text-xl"></i>
+</button>
+</div>
+<!-- Mobile Dropdown Menu -->
+<div class="hidden absolute top-full left-0 w-full bg-black/95 backdrop-blur-2xl border-b border-white/10 py-6 px-8 flex flex-col gap-6 font-bold text-slate-300" id="mobile-dropdown">
+<a class="hover:text-blue-400" href="#overview">Company Overview</a>
+<a class="hover:text-blue-400" href="#market">Market &amp; Clients</a>
+<a class="hover:text-blue-400" href="#operation">Pipeline</a>
+<a class="hover:text-blue-400" href="#financials">Financials</a>
+<a class="hover:text-blue-400" href="#risk">Compliance</a>
+</div>
+</nav>
+<!-- END: Navigation -->
+<!-- BEGIN: Hero Section -->
+<header class="pt-28 pb-16 px-6 text-center">
+<div class="reveal active inline-block px-3 py-1 rounded-full border border-blue-500/30 bg-blue-500/10 text-blue-400 text-[10px] font-bold tracking-widest uppercase mb-6">
+      Hybrid Web3 Fintech Business
+    </div>
+<h1 class="reveal active text-5xl font-black tracking-tighter leading-tight mb-6">
+<span class="block text-gradient">Global</span>
+<span class="block text-gradient">Cross-Border</span>
+<span class="block text-gradient-blue">Settlement.</span>
+</h1>
+<p class="reveal active text-slate-400 text-sm leading-relaxed max-w-sm mx-auto mb-8">
+      AQWIRE는 부동산, BPO, 엔터프라이즈 기업을 위한 글로벌 크로스보더 결제 및 투명한 USDT 정산 솔루션을 제공합니다.
+    </p>
+<div class="reveal active flex flex-col gap-4">
+<button class="bg-white text-black font-black py-4 rounded-2xl shadow-xl active:scale-95 transition-transform" onclick="document.getElementById('financials').scrollIntoView({behavior:'smooth'})">
+        시뮬레이터 시작하기 <i class="fas fa-arrow-right ml-2"></i>
+</button>
+</div>
+</header>
+<!-- END: Hero Section -->
+<!-- BEGIN: Overview Section -->
+<section class="py-12 px-6" id="overview">
+<div class="mb-10 text-center">
+<h2 class="text-xs font-bold text-blue-500 uppercase tracking-widest mb-2">01. Company Overview</h2>
+<h3 class="text-3xl font-black text-gradient">압도적 인프라</h3>
+</div>
+<div class="flex overflow-x-auto snap-x snap-mandatory gap-4 no-scrollbar pb-4">
+<div class="snap-center min-w-[280px] glass-card p-6 border-blue-500/20">
+<i class="fas fa-history text-2xl text-blue-400 mb-4"></i>
+<h4 class="font-bold text-lg mb-2">12년 업력</h4>
+<p class="text-xs text-slate-400 leading-relaxed">2013년 설립, 필리핀 GCash보다 앞선 핀테크 생태계의 선구자입니다.</p>
+</div>
+<div class="snap-center min-w-[280px] glass-card p-6">
+<i class="fas fa-globe text-2xl text-emerald-400 mb-4"></i>
+<h4 class="font-bold text-lg mb-2">150개 통화 지원</h4>
+<p class="text-xs text-slate-400 leading-relaxed">전 세계 150개 이상의 통화 자금을 안정적으로 수취하는 글로벌 인프라.</p>
+</div>
+<div class="snap-center min-w-[280px] glass-card p-6">
+<i class="fas fa-cash-register text-2xl text-purple-400 mb-4"></i>
+<h4 class="font-bold text-lg mb-2">올인원 PTS</h4>
+<p class="text-xs text-slate-400 leading-relaxed">신용카드, GCash, Maya 등 모든 결제를 기기 한 대로 통합 지원합니다.</p>
+</div>
+</div>
+</section>
+<!-- END: Overview Section -->
+<!-- BEGIN: Market Section -->
+<section class="py-12 px-6 bg-white/5" id="market">
+<div class="mb-10 text-center">
+<h2 class="text-xs font-bold text-blue-500 uppercase tracking-widest mb-2">02. Market &amp; Partners</h2>
+<h3 class="text-3xl font-black text-gradient">검증된 네트워크</h3>
+</div>
+<div class="space-y-4">
+<div class="glass-card p-6">
+<h4 class="text-sm font-bold text-slate-400 uppercase tracking-tighter mb-4">Major Clients</h4>
+<div class="grid grid-cols-2 gap-2">
+<div class="bg-black/40 p-3 rounded-xl border border-white/5 text-[11px] font-bold">AyalaLand</div>
+<div class="bg-black/40 p-3 rounded-xl border border-white/5 text-[11px] font-bold">SMDC</div>
+<div class="bg-black/40 p-3 rounded-xl border border-white/5 text-[11px] font-bold">Megaworld</div>
+<div class="bg-black/40 p-3 rounded-xl border border-white/5 text-[11px] font-bold">Rockwell</div>
+</div>
+</div>
+<div class="glass-card p-6 border-emerald-500/20">
+<h4 class="text-sm font-bold text-emerald-400 uppercase tracking-tighter mb-4">Key Investors</h4>
+<div class="space-y-4">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0"><i class="fas fa-leaf text-emerald-500"></i></div>
+<div>
+<div class="text-sm font-black">Gentree Fund</div>
+<div class="text-[10px] text-slate-500">SM 그룹 패밀리 오피스 투자</div>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center shrink-0"><i class="fas fa-landmark text-blue-500"></i></div>
+<div>
+<div class="text-sm font-black">NDC (국영투자사)</div>
+<div class="text-[10px] text-slate-500">필리핀 통상산업부(DTI) 파트너십</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- END: Market Section -->
+<!-- BEGIN: Operation Pipeline -->
+<section class="py-12 px-6" id="operation">
+<div class="mb-10 text-center">
+<h2 class="text-xs font-bold text-blue-500 uppercase tracking-widest mb-2">03. Pipeline</h2>
+<h3 class="text-3xl font-black text-gradient">투명한 정산 흐름</h3>
+</div>
+<div class="space-y-6">
+<div class="glass-card p-5 text-center relative overflow-hidden">
+<i class="fas fa-won-sign text-2xl text-blue-400 mb-2"></i>
+<div class="font-bold text-sm">KRW 결제 수취</div>
+<div class="text-[10px] text-slate-500 mt-1">PTS 단말기 &amp; 웹 대시보드</div>
+</div>
+<div class="flex justify-center h-8">
+<div class="w-0.5 h-full bg-blue-500/20 relative overflow-hidden">
+<div class="absolute top-0 left-0 w-full h-1/2 bg-blue-400 animate-[flowDown_2s_infinite]"></div>
+</div>
+</div>
+<div class="glass-card p-5 text-center">
+<i class="fas fa-exchange-alt text-2xl text-purple-400 mb-2"></i>
+<div class="font-bold text-sm">환율 적용 (PHP)</div>
+<div class="text-[10px] text-slate-500 mt-1">FX Spread + MAYA API</div>
+</div>
+<div class="flex justify-center h-8">
+<div class="w-0.5 h-full bg-purple-500/20 relative overflow-hidden">
+<div class="absolute top-0 left-0 w-full h-1/2 bg-purple-400 animate-[flowDown_2s_infinite]"></div>
+</div>
+</div>
+<div class="glass-card p-6 text-center border-emerald-500/30 glow-blue">
+<i class="fab fa-usps text-3xl text-emerald-400 mb-2"></i>
+<div class="font-black text-emerald-300">USDT 최종 발송</div>
+<div class="text-[10px] text-emerald-500/70 mt-1">확정 마진 즉시 정산</div>
+</div>
+</div>
+</section>
+<style>
+    @keyframes flowDown {
+      0% { transform: translateY(-100%); }
+      100% { transform: translateY(200%); }
+    }
+  </style>
+<!-- END: Operation Pipeline -->
+<!-- BEGIN: Simulator Section -->
+<section class="py-12 px-6 bg-blue-900/10" id="financials">
+<div class="mb-10 text-center">
+<h2 class="text-xs font-bold text-blue-500 uppercase tracking-widest mb-2">04. Simulator</h2>
+<h3 class="text-3xl font-black text-gradient">수익 시뮬레이션</h3>
+</div>
+<div class="space-y-6">
+<!-- Input Card -->
+<div class="glass-card p-6">
+<label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">결제 규모 (Volume)</label>
+<div class="relative">
+<select class="w-full bg-black/40 border border-white/10 rounded-xl p-4 text-xl font-black text-white focus:ring-blue-500 focus:border-blue-500 appearance-none" id="sim-vol">
+<option value="10000000">1,000만 원</option>
+<option value="100000000">1억 원</option>
+<option value="500000000">5억 원</option>
+<option selected="" value="1000000000">10억 원</option>
+</select>
+<i class="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none"></i>
+</div>
+<div class="mt-6 space-y-2 text-[11px] text-slate-400">
+<div class="flex justify-between"><span>총 고정 마진</span><span class="text-white font-bold">8.00%</span></div>
+<div class="flex justify-between"><span>AQWIRE PG 수수료</span><span class="text-rose-400 font-bold">- 5.00%</span></div>
+<div class="pt-2 border-t border-white/10 flex justify-between">
+<span class="font-bold text-blue-400">파트너 최종 이익률</span>
+<span class="text-blue-400 font-black">3.00%</span>
+</div>
+</div>
+</div>
+<!-- Chart Display -->
+<div class="glass-card p-8 flex flex-col items-center">
+<div class="orbital-container mb-6">
+<div class="ring w-full h-full"></div>
+<div class="ring w-[85%] h-[85%]" style="animation-direction: reverse; border-color: rgba(16, 185, 129, 0.2);"></div>
+<canvas id="mobileChart"></canvas>
+<div class="absolute flex flex-col items-center pointer-events-none">
+<span class="text-2xl font-black text-white">5 : 3</span>
+<span class="text-[8px] text-blue-300 font-bold tracking-widest">SPLIT</span>
+</div>
+</div>
+<div class="w-full grid grid-cols-1 gap-3">
+<div class="bg-black/60 p-4 rounded-xl border border-white/5">
+<div class="text-[9px] text-slate-500 font-bold mb-1">AQWIRE PG 수수료 (5%)</div>
+<div class="text-xl font-black text-white" id="res-aq">50,000,000</div>
+</div>
+<div class="bg-blue-600/10 p-4 rounded-xl border border-blue-500/20">
+<div class="text-[9px] text-blue-400 font-bold mb-1">운영 파트너 팀 (3%)</div>
+<div class="text-xl font-black text-blue-400" id="res-tm">30,000,000</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- END: Simulator Section -->
+<!-- BEGIN: Compliance Section -->
+<section class="py-12 px-6" id="risk">
+<div class="mb-10 text-center">
+<h2 class="text-xs font-bold text-blue-500 uppercase tracking-widest mb-2">05. Compliance</h2>
+<h3 class="text-3xl font-black text-gradient">안전한 법적 보호망</h3>
+</div>
+<div class="space-y-4">
+<div class="glass-card p-6">
+<div class="flex items-start gap-4">
+<i class="fas fa-shield-alt text-emerald-400 mt-1"></i>
+<div>
+<h4 class="font-bold text-sm mb-1">BSP 정식 라이선스</h4>
+<p class="text-xs text-slate-400 leading-relaxed">필리핀 중앙은행 공식 인가 OPS 라이선스 보유.</p>
+</div>
+</div>
+</div>
+<div class="glass-card p-6">
+<div class="flex items-start gap-4">
+<i class="fas fa-certificate text-blue-400 mt-1"></i>
+<div>
+<h4 class="font-bold text-sm mb-1">비즈니스 퍼밋 완료</h4>
+<p class="text-xs text-slate-400 leading-relaxed">2026년까지 유효한 마카티 시 정부 영업 허가.</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- END: Compliance Section -->
+<!-- BEGIN: Contact & Footer -->
+<section class="py-12 px-6 border-t border-white/5" id="contact">
+<div class="text-center">
+<h3 class="text-xl font-bold mb-6">Partnership Inquiry</h3>
+<a class="inline-flex items-center gap-3 bg-white/5 border border-white/10 px-6 py-4 rounded-2xl w-full justify-center active:bg-white/10 transition-colors" href="mailto:support@aqwire.io">
+<i class="fas fa-envelope text-blue-400"></i>
+<span class="text-sm font-bold">support@aqwire.io</span>
+</a>
+<div class="mt-12 opacity-50 flex flex-col items-center gap-4">
+<div class="text-[10px] font-bold tracking-widest uppercase">
+          © 2026 AQWIRE GLOBAL. Confidential.
+        </div>
+<a class="text-blue-500 text-xs font-bold border-b border-blue-500/30 pb-1" href="https://aqwire.co" target="_blank">
+          Visit Official Website : aqwire.co
+        </a>
+</div>
+</div>
+</section>
+<!-- END: Contact & Footer -->
+<!-- BEGIN: Bottom Navigation Bar -->
+<div class="fixed bottom-0 left-0 w-full bg-black/80 backdrop-blur-xl border-t border-white/10 px-4 py-3 flex justify-between items-center z-[100]">
+<button class="flex flex-col items-center gap-1 flex-1" onclick="window.scrollTo({top:0, behavior:'smooth'})">
+<i class="fas fa-home text-blue-500"></i>
+<span class="text-[9px] font-bold text-slate-400">홈</span>
+</button>
+<button class="flex flex-col items-center gap-1 flex-1" onclick="document.getElementById('overview').scrollIntoView({behavior:'smooth'})">
+<i class="fas fa-info-circle text-slate-400"></i>
+<span class="text-[9px] font-bold text-slate-400">개요</span>
+</button>
+<button class="flex flex-col items-center gap-1 flex-1" onclick="document.getElementById('financials').scrollIntoView({behavior:'smooth'})">
+<i class="fas fa-calculator text-slate-400"></i>
+<span class="text-[9px] font-bold text-slate-400">시뮬레이터</span>
+</button>
+<button class="flex flex-col items-center gap-1 flex-1" onclick="document.getElementById('risk').scrollIntoView({behavior:'smooth'})">
+<i class="fas fa-shield-halved text-slate-400"></i>
+<span class="text-[9px] font-bold text-slate-400">보안</span>
+</button>
+</div>
+<!-- END: Bottom Navigation Bar -->
+<script data-purpose="ui-logic">
+    // Mobile Menu Toggle
+    const menuBtn = document.getElementById('mobile-menu-btn');
+    const dropdown = document.getElementById('mobile-dropdown');
+    
+    menuBtn.addEventListener('click', () => {
+      dropdown.classList.toggle('hidden');
+    });
+
+    // Close menu on link click
+    dropdown.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', () => dropdown.classList.add('hidden'));
+    });
+
+    // Intersection Observer for Reveal
+    const observerOptions = { threshold: 0.1 };
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) entry.target.classList.add('active');
+      });
+    }, observerOptions);
+
+    document.querySelectorAll('.reveal, section').forEach(el => observer.observe(el));
+    
+    // Header shadow on scroll
+    window.addEventListener('scroll', () => {
+      const nav = document.getElementById('navbar');
+      if (window.scrollY > 20) nav.classList.add('bg-black/80');
+      else nav.classList.remove('bg-black/80');
+    });
+  </script>
+<script data-purpose="simulator-logic">
+    let chartInstance = null;
+    let currentAq = 50000000;
+    let currentTm = 30000000;
+
+    const animateNumber = (elementId, start, end) => {
+      const el = document.getElementById(elementId);
+      const duration = 1000;
+      let startTimestamp = null;
+      
+      const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        const value = Math.floor(progress * (end - start) + start);
+        el.innerText = value.toLocaleString();
+        if (progress < 1) window.requestAnimationFrame(step);
+      };
+      window.requestAnimationFrame(step);
+    };
+
+    const initChart = () => {
+      const ctx = document.getElementById('mobileChart').getContext('2d');
+      
+      chartInstance = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: ['AQWIRE', 'Partner'],
+          datasets: [{
+            data: [50000000, 30000000],
+            backgroundColor: ['#2563eb', '#a855f7'],
+            borderWidth: 0,
+            hoverOffset: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: '80%',
+          plugins: {
+            legend: { display: false },
+            tooltip: { enabled: false }
+          },
+          animation: { animateRotate: true, duration: 1500 }
+        }
+      });
+    };
+
+    const updateSim = () => {
+      const vol = parseInt(document.getElementById('sim-vol').value);
+      const aq = vol * 0.05;
+      const tm = vol * 0.03;
+
+      animateNumber('res-aq', currentAq, aq);
+      animateNumber('res-tm', currentTm, tm);
+
+      currentAq = aq;
+      currentTm = tm;
+
+      if(chartInstance) {
+        chartInstance.data.datasets[0].data = [aq, tm];
+        chartInstance.update();
+      }
+    };
+
+    document.getElementById('sim-vol').addEventListener('change', updateSim);
+
+    // Init when visible
+    const simSection = document.getElementById('financials');
+    const simObserver = new IntersectionObserver((entries) => {
+      if(entries[0].isIntersecting) {
+        initChart();
+        simObserver.disconnect();
+      }
+    }, { threshold: 0.5 });
+    simObserver.observe(simSection);
+  </script>
+</body></html>
